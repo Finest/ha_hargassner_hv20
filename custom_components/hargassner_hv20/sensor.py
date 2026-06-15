@@ -130,6 +130,12 @@ class HargassnerBoilerStateTextSensor(CoordinatorEntity[HargassnerCoordinator], 
         self._attr_unique_id = f"{entry.entry_id}_boiler_state_text"
 
     @property
+    def available(self) -> bool:
+        # Keep the last known status visible when a poll fails. The separate
+        # connection sensor and attributes below show whether the value is stale.
+        return self.coordinator.data is not None
+
+    @property
     def native_value(self) -> str | None:
         if not self.coordinator.data:
             return None
@@ -149,6 +155,9 @@ class HargassnerBoilerStateTextSensor(CoordinatorEntity[HargassnerCoordinator], 
             "state_code": state_code,
             "source_channel": "ZK / analog 22",
             "boiler_output_percent": boiler_output,
+            "connection_ok": self.coordinator.last_update_success,
+            "stale": not self.coordinator.last_update_success,
+            "last_successful_update": self.coordinator.data.received_at.isoformat() if self.coordinator.data else None,
             "mapping_source": "public Hargassner integrations plus HV20 manual wording",
             "mapping_quality": "best_effort_until_verified_on_this_HV20_display",
         }
@@ -176,6 +185,12 @@ class HargassnerFaultTextSensor(CoordinatorEntity[HargassnerCoordinator], Sensor
         self._attr_unique_id = f"{entry.entry_id}_fault_text"
 
     @property
+    def available(self) -> bool:
+        # Keep the last known fault text visible when a poll fails. The separate
+        # connection sensor and attributes below show whether the value is stale.
+        return self.coordinator.data is not None
+
+    @property
     def native_value(self) -> str | None:
         if not self.coordinator.data:
             return None
@@ -197,6 +212,9 @@ class HargassnerFaultTextSensor(CoordinatorEntity[HargassnerCoordinator], Sensor
         return {
             "fault_number": fault_number,
             "fault_active": fault_active,
+            "connection_ok": self.coordinator.last_update_success,
+            "stale": not self.coordinator.last_update_success,
+            "last_successful_update": self.coordinator.data.received_at.isoformat() if self.coordinator.data else None,
             "mapping_source": "HV20 manual examples plus public Hargassner cross-model mappings",
             "mapping_quality": "partial_best_effort; unknown non-zero codes are exposed as numeric fallback",
         }

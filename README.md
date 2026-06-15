@@ -214,6 +214,8 @@ The raw **Kesselzustand Code** sensor is kept for diagnostics. The text mapping 
 
 A **Störungstext** sensor exposes `Keine Störung` for fault code `0`, includes a conservative partial mapping for common Hargassner fault numbers, and falls back to `Störung <number>` for unknown non-zero fault numbers. A complete reliable fault-number-to-text mapping has not yet been verified for this firmware.
 
+The **Kesselzustand** and **Störungstext** text sensors keep their last known value visible when a later poll fails. Their attributes include `connection_ok`, `stale`, and `last_successful_update`; use the separate **Verbindung** binary sensor for the authoritative online/offline state. Numeric measurement sensors still follow Home Assistant's normal coordinator availability behavior to avoid presenting stale temperatures or outputs as current values.
+
 ## Entity behavior
 
 The tested boiler exposes many channels. Not every channel is useful for every installation.
