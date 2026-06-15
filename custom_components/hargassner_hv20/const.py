@@ -1,0 +1,12 @@
+DOMAIN = "hargassner_hv20"
+DEFAULT_NAME = "Hargassner HV20"
+DEFAULT_HOST = "192.168.178.59"
+DEFAULT_PORT = 23
+DEFAULT_SCAN_INTERVAL = 30
+CONF_INCLUDE_DISABLED = "include_disabled"
+PLATFORMS = ["sensor", "binary_sensor"]
+
+# HV20 BJ2016 / firmware V10.2j from DAQ00000.DAQ
+MODEL = "HV20"
+SOFTWARE_VERSION = "V10.2j"
+HARDWARE_VERSION = "V2.0h"

@@ -1,0 +1,22 @@
+{
+  "config": {
+    "step": {
+      "user": {
+        "title": "Set up Hargassner HV20",
+        "description": "Connects locally to the Hargassner HV20 via Telnet/TCP port 23.",
+        "data": {
+          "host": "Host/IP address",
+          "port": "Port",
+          "scan_interval": "Scan interval in seconds"
+        }
+      }
+    },
+    "error": {
+      "cannot_connect": "Could not connect or no valid pm data stream received.",
+      "unknown": "Unexpected error"
+    },
+    "abort": {
+      "already_configured": "This device is already configured."
+    }
+  }
+}

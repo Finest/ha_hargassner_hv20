@@ -1,0 +1,40 @@
+# Python
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.venv/
+venv/
+
+# Secrets / credentials
+*.token
+*.secret
+*.secrets
+*.key
+*.pem
+*.crt
+.env
+.env.*
+secrets.yaml
+*.netrc
+.netrc
+credentials/
+
+# Home Assistant runtime / databases / logs
+home-assistant*.log*
+home-assistant_v2.db*
+.storage/
+.cloud/
+deps/
+tts/
+zigbee.db*
+
+# OS/editor
+.DS_Store
+.idea/
+.vscode/
+
+# Raw Hargassner SD dumps / vendor files are useful locally but should not be published.
+fixtures/sd_dump/*
+!fixtures/sd_dump/.gitkeep

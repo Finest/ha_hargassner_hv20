@@ -1,0 +1,22 @@
+{
+  "config": {
+    "step": {
+      "user": {
+        "title": "Hargassner HV20 einrichten",
+        "description": "Verbindet sich lokal per Telnet/TCP Port 23 mit der Hargassner HV20.",
+        "data": {
+          "host": "Host/IP-Adresse",
+          "port": "Port",
+          "scan_interval": "Abfrageintervall in Sekunden"
+        }
+      }
+    },
+    "error": {
+      "cannot_connect": "Keine Verbindung oder kein gültiger pm-Datenstrom empfangen.",
+      "unknown": "Unerwarteter Fehler"
+    },
+    "abort": {
+      "already_configured": "Dieses Gerät ist bereits konfiguriert."
+    }
+  }
+}
