@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from typing import Any
 
-from homeassistant.components.binary_sensor import BinarySensorEntity
+from homeassistant.components.binary_sensor import BinarySensorDeviceClass, BinarySensorEntity
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
@@ -42,7 +42,51 @@ DEFAULT_ENABLED_DIGITAL_KEYS = {
 
 async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry, async_add_entities: AddEntitiesCallback) -> None:
     coordinator: HargassnerCoordinator = entry.runtime_data
-    async_add_entities(HargassnerDigitalSensor(coordinator, entry, ch) for ch in DIGITAL_CHANNELS)
+    entities: list[BinarySensorEntity] = [HargassnerConnectionSensor(coordinator, entry)]
+    entities.extend(HargassnerDigitalSensor(coordinator, entry, ch) for ch in DIGITAL_CHANNELS)
+    async_add_entities(entities)
+
+
+class HargassnerConnectionSensor(CoordinatorEntity[HargassnerCoordinator], BinarySensorEntity):
+    _attr_has_entity_name = True
+    _attr_name = "Verbindung"
+    _attr_device_class = BinarySensorDeviceClass.CONNECTIVITY
+    _attr_entity_registry_enabled_default = True
+
+    def __init__(self, coordinator: HargassnerCoordinator, entry: ConfigEntry) -> None:
+        super().__init__(coordinator)
+        self._entry = entry
+        self._attr_unique_id = f"{entry.entry_id}_connection"
+
+    @property
+    def available(self) -> bool:
+        # Keep the connection entity available so it can explicitly show on/off
+        # even when the coordinator's latest poll failed.
+        return True
+
+    @property
+    def is_on(self) -> bool:
+        return self.coordinator.last_update_success and self.coordinator.data is not None
+
+    @property
+    def extra_state_attributes(self) -> dict[str, Any]:
+        data = self.coordinator.data
+        return {
+            "last_successful_update": data.received_at.isoformat() if data else None,
+            "host": self.coordinator.client.host,
+            "port": self.coordinator.client.port,
+        }
+
+    @property
+    def device_info(self):
+        return {
+            "identifiers": {(DOMAIN, self._entry.entry_id)},
+            "name": self._entry.title,
+            "manufacturer": "Hargassner",
+            "model": MODEL,
+            "sw_version": SOFTWARE_VERSION,
+            "hw_version": HARDWARE_VERSION,
+        }
 
 
 class HargassnerDigitalSensor(CoordinatorEntity[HargassnerCoordinator], BinarySensorEntity):

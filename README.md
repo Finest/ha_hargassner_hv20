@@ -47,6 +47,7 @@ The integration maps those values into Home Assistant entities:
   - Boiler-Anforderungen
   - Störung
   - Fremdwärme Freigabe/Pumpe
+  - Verbindung / connectivity status
 
 The channel mapping was generated from the boiler SD-card file:
 
@@ -186,6 +187,8 @@ After restart:
 
 The integration validates the connection by reading one live `pm` frame.
 
+It also creates a connectivity binary sensor named **Verbindung** (`binary_sensor.hargassner_hv20_verbindung`). This sensor stays available and turns off when the latest boiler poll failed, which makes it useful for dashboard status cards or alert automations.
+
 ## Entity behavior
 
 The tested boiler exposes many channels. Not every channel is useful for every installation.
@@ -242,7 +245,7 @@ If you also have separate Shelly temperature sensors for wood boiler flow/return
 - Check that `manifest.json` is inside that folder.
 - Restart Home Assistant.
 
-### Cannot connect
+### Cannot connect / Verbindung is off
 
 - Check the boiler IP address.
 - Check that TCP port `23` is reachable from Home Assistant.
