@@ -201,37 +201,6 @@ Therefore:
 
 This is intentional to avoid flooding Home Assistant with noisy or irrelevant entities.
 
-## Notes about old template sensors
-
-Before this integration, the test system used a raw TCP sensor and template sensors such as:
-
-- `sensor.hargassner_hz1`
-- `sensor.ofentemperatur`
-- `sensor.abgastemperatur`
-- `sensor.lambda`
-- `sensor.puffertemperatur_oben`
-- `sensor.puffertemperatur_mitte`
-- `sensor.puffertemperatur_unten`
-- `sensor.aussentemperatur`
-- `sensor.pufferladung`
-- `sensor.hz1leistung`
-
-Those can be replaced by the new integration entities, for example:
-
-| Old entity | New entity |
-| --- | --- |
-| `sensor.ofentemperatur` | `sensor.hargassner_hv20_kesseltemperatur_ist` |
-| `sensor.abgastemperatur` | `sensor.hargassner_hv20_rauchgastemperatur_ist` |
-| `sensor.lambda` | `sensor.hargassner_hv20_sauerstoff_o2_ist` |
-| `sensor.hz1leistung` | `sensor.hargassner_hv20_kesselleistung` |
-| `sensor.puffertemperatur_oben` | `sensor.hargassner_hv20_puffer_oben` |
-| `sensor.puffertemperatur_mitte` | `sensor.hargassner_hv20_puffer_mitte` |
-| `sensor.puffertemperatur_unten` | `sensor.hargassner_hv20_puffer_unten` |
-| `sensor.pufferladung` | `sensor.hargassner_hv20_puffer_ladezustand` |
-| `sensor.aussentemperatur` | `sensor.hargassner_hv20_aussentemperatur` |
-
-If you also have separate Shelly temperature sensors for wood boiler flow/return, keep those separate and do not replace them blindly.
-
 ## Troubleshooting
 
 ### Integration does not appear
