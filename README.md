@@ -48,6 +48,8 @@ The integration maps those values into Home Assistant entities:
   - Störung
   - Fremdwärme Freigabe/Pumpe
   - Verbindung / connectivity status
+  - Kesseltür open/closed status
+  - Störungstext diagnostic sensor
 
 The channel mapping was generated from the boiler SD-card file:
 
@@ -188,6 +190,10 @@ After restart:
 The integration validates the connection by reading one live `pm` frame.
 
 It also creates a connectivity binary sensor named **Verbindung** (`binary_sensor.hargassner_hv20_verbindung`). This sensor stays available and turns off when the latest boiler poll failed, which makes it useful for dashboard status cards or alert automations.
+
+The boiler door contact is exposed as **Kesseltür**. The raw DAQ bit `TKS` is true when the door contact is closed; the Home Assistant door entity follows HA convention and is `on` when the door is open.
+
+A **Störungstext** sensor exposes `Keine Störung` for fault code `0` and falls back to `Störung <number>` for unknown non-zero fault numbers. A complete reliable fault-number-to-text mapping has not yet been verified for this firmware.
 
 ## Entity behavior
 

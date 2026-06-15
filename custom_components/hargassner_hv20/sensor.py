@@ -14,6 +14,10 @@ from .const import DOMAIN, MODEL, SOFTWARE_VERSION, HARDWARE_VERSION
 from .coordinator import HargassnerCoordinator
 from .friendly_names import friendly_analog_name
 
+FAULT_TEXTS: dict[int, str] = {
+    0: "Keine Störung",
+}
+
 # Keep noisy/unused expansion channels disabled by default, but expose the core HV20
 # values and common heating/boiler/buffer values immediately.
 DEFAULT_ENABLED_ANALOG_IDS = {
@@ -48,7 +52,59 @@ def _device_class(unit: str | None) -> SensorDeviceClass | None:
 
 async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry, async_add_entities: AddEntitiesCallback) -> None:
     coordinator: HargassnerCoordinator = entry.runtime_data
-    async_add_entities(HargassnerAnalogSensor(coordinator, entry, ch) for ch in ANALOG_CHANNELS)
+    entities: list[SensorEntity] = [HargassnerFaultTextSensor(coordinator, entry)]
+    entities.extend(HargassnerAnalogSensor(coordinator, entry, ch) for ch in ANALOG_CHANNELS)
+    async_add_entities(entities)
+
+
+class HargassnerFaultTextSensor(CoordinatorEntity[HargassnerCoordinator], SensorEntity):
+    _attr_has_entity_name = True
+    _attr_name = "Störungstext"
+    _attr_entity_registry_enabled_default = True
+
+    def __init__(self, coordinator: HargassnerCoordinator, entry: ConfigEntry) -> None:
+        super().__init__(coordinator)
+        self._entry = entry
+        self._attr_unique_id = f"{entry.entry_id}_fault_text"
+
+    @property
+    def native_value(self) -> str | None:
+        if not self.coordinator.data:
+            return None
+        raw = self.coordinator.data.analog.get(141)
+        try:
+            fault_number = int(raw)
+        except (TypeError, ValueError):
+            return None
+        return FAULT_TEXTS.get(fault_number, f"Störung {fault_number}")
+
+    @property
+    def extra_state_attributes(self) -> dict[str, Any]:
+        fault_number = None
+        fault_active = None
+        if self.coordinator.data:
+            raw = self.coordinator.data.analog.get(141)
+            try:
+                fault_number = int(raw)
+            except (TypeError, ValueError):
+                fault_number = raw
+            fault_active = self.coordinator.data.digital.get("d01_02_st_rung")
+        return {
+            "fault_number": fault_number,
+            "fault_active": fault_active,
+            "mapping_quality": "known for code 0 only; non-zero codes are exposed as numeric fallback",
+        }
+
+    @property
+    def device_info(self):
+        return {
+            "identifiers": {(DOMAIN, self._entry.entry_id)},
+            "name": self._entry.title,
+            "manufacturer": "Hargassner",
+            "model": MODEL,
+            "sw_version": SOFTWARE_VERSION,
+            "hw_version": HARDWARE_VERSION,
+        }
 
 
 class HargassnerAnalogSensor(CoordinatorEntity[HargassnerCoordinator], SensorEntity):

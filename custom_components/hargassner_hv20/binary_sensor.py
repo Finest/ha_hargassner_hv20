@@ -42,8 +42,11 @@ DEFAULT_ENABLED_DIGITAL_KEYS = {
 
 async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry, async_add_entities: AddEntitiesCallback) -> None:
     coordinator: HargassnerCoordinator = entry.runtime_data
-    entities: list[BinarySensorEntity] = [HargassnerConnectionSensor(coordinator, entry)]
-    entities.extend(HargassnerDigitalSensor(coordinator, entry, ch) for ch in DIGITAL_CHANNELS)
+    entities: list[BinarySensorEntity] = [
+        HargassnerConnectionSensor(coordinator, entry),
+        HargassnerDoorSensor(coordinator, entry),
+    ]
+    entities.extend(HargassnerDigitalSensor(coordinator, entry, ch) for ch in DIGITAL_CHANNELS if ch["key"] != "d01_01_tks")
     async_add_entities(entities)
 
 
@@ -75,6 +78,54 @@ class HargassnerConnectionSensor(CoordinatorEntity[HargassnerCoordinator], Binar
             "last_successful_update": data.received_at.isoformat() if data else None,
             "host": self.coordinator.client.host,
             "port": self.coordinator.client.port,
+        }
+
+    @property
+    def device_info(self):
+        return {
+            "identifiers": {(DOMAIN, self._entry.entry_id)},
+            "name": self._entry.title,
+            "manufacturer": "Hargassner",
+            "model": MODEL,
+            "sw_version": SOFTWARE_VERSION,
+            "hw_version": HARDWARE_VERSION,
+        }
+
+
+class HargassnerDoorSensor(CoordinatorEntity[HargassnerCoordinator], BinarySensorEntity):
+    _attr_has_entity_name = True
+    _attr_name = "Kesseltür"
+    _attr_device_class = BinarySensorDeviceClass.DOOR
+    _attr_entity_registry_enabled_default = True
+
+    def __init__(self, coordinator: HargassnerCoordinator, entry: ConfigEntry) -> None:
+        super().__init__(coordinator)
+        self._entry = entry
+        # Reuse the original DAQ unique id so existing installs migrate cleanly
+        # from the raw TKS bit to the proper door entity.
+        self._attr_unique_id = f"{entry.entry_id}_d01_01_tks"
+
+    @property
+    def is_on(self) -> bool | None:
+        if not self.coordinator.data:
+            return None
+        raw_contact_closed = self.coordinator.data.digital.get("d01_01_tks")
+        if raw_contact_closed is None:
+            return None
+        # TKS is true when the boiler door contact is closed. Home Assistant door
+        # sensors use on=True for open, so expose the inverted value.
+        return not raw_contact_closed
+
+    @property
+    def extra_state_attributes(self) -> dict[str, Any]:
+        raw_contact_closed = None
+        if self.coordinator.data:
+            raw_contact_closed = self.coordinator.data.digital.get("d01_01_tks")
+        return {
+            "daq_word": 1,
+            "daq_bit": 1,
+            "daq_name": "TKS",
+            "raw_contact_closed": raw_contact_closed,
         }
 
     @property

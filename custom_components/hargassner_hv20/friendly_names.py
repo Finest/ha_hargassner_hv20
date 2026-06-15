@@ -182,7 +182,7 @@ DIGITAL_FRIENDLY_NAMES: dict[str, str] = {
     "d00_13_plk_auf": "Primärluftklappe öffnet",
     "d00_14_plk_zu": "Primärluftklappe schließt",
     "d01_00_stb": "Sicherheitstemperaturbegrenzer",
-    "d01_01_tks": "Kesseltemperatur Sicherheit",
+    "d01_01_tks": "Kesseltür geschlossen",
     "d01_02_st_rung": "Störung",
     "d01_03_ext_anf": "Externe Anforderung",
     "d02_00_bp1": "Boiler 1 Pumpe",
