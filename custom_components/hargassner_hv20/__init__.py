@@ -11,8 +11,8 @@ type HargassnerConfigEntry = ConfigEntry[HargassnerCoordinator]
 
 
 async def async_setup_entry(hass: HomeAssistant, entry: HargassnerConfigEntry) -> bool:
-    host = entry.data["host"]
-    port = int(entry.data.get("port", DEFAULT_PORT))
+    host = entry.options.get("host", entry.data["host"])
+    port = int(entry.options.get("port", entry.data.get("port", DEFAULT_PORT)))
     scan_interval = int(entry.options.get("scan_interval", entry.data.get("scan_interval", DEFAULT_SCAN_INTERVAL)))
 
     client = HargassnerClient(host=host, port=port)
@@ -20,9 +20,14 @@ async def async_setup_entry(hass: HomeAssistant, entry: HargassnerConfigEntry) -
     await coordinator.async_config_entry_first_refresh()
 
     entry.runtime_data = coordinator
+    entry.async_on_unload(entry.add_update_listener(async_reload_entry))
     await hass.config_entries.async_forward_entry_setups(entry, PLATFORMS)
     return True
 
 
 async def async_unload_entry(hass: HomeAssistant, entry: HargassnerConfigEntry) -> bool:
     return await hass.config_entries.async_unload_platforms(entry, PLATFORMS)
+
+
+async def async_reload_entry(hass: HomeAssistant, entry: HargassnerConfigEntry) -> None:
+    await hass.config_entries.async_reload(entry.entry_id)

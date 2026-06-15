@@ -20,6 +20,21 @@ STEP_USER_DATA_SCHEMA = vol.Schema(
 )
 
 
+def _options_schema(config_entry: config_entries.ConfigEntry) -> vol.Schema:
+    return vol.Schema(
+        {
+            vol.Required("host", default=config_entry.options.get("host", config_entry.data.get("host", DEFAULT_HOST))): str,
+            vol.Optional("port", default=config_entry.options.get("port", config_entry.data.get("port", DEFAULT_PORT))): int,
+            vol.Optional(
+                "scan_interval",
+                default=config_entry.options.get(
+                    "scan_interval", config_entry.data.get("scan_interval", DEFAULT_SCAN_INTERVAL)
+                ),
+            ): int,
+        }
+    )
+
+
 async def validate_input(hass: HomeAssistant, data: dict[str, Any]) -> dict[str, Any]:
     client = HargassnerClient(data["host"], int(data.get("port", DEFAULT_PORT)))
     try:
@@ -31,6 +46,10 @@ async def validate_input(hass: HomeAssistant, data: dict[str, Any]) -> dict[str,
 
 class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
     VERSION = 1
+
+    @staticmethod
+    def async_get_options_flow(config_entry: config_entries.ConfigEntry) -> config_entries.OptionsFlow:
+        return OptionsFlowHandler(config_entry)
 
     async def async_step_user(self, user_input: dict[str, Any] | None = None):
         errors: dict[str, str] = {}
@@ -47,6 +66,25 @@ class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
                 return self.async_create_entry(title=info["title"], data=user_input)
 
         return self.async_show_form(step_id="user", data_schema=STEP_USER_DATA_SCHEMA, errors=errors)
+
+
+class OptionsFlowHandler(config_entries.OptionsFlow):
+    def __init__(self, config_entry: config_entries.ConfigEntry) -> None:
+        self.config_entry = config_entry
+
+    async def async_step_init(self, user_input: dict[str, Any] | None = None):
+        errors: dict[str, str] = {}
+        if user_input is not None:
+            try:
+                await validate_input(self.hass, user_input)
+            except CannotConnect:
+                errors["base"] = "cannot_connect"
+            except Exception:  # noqa: BLE001 - show generic HA flow error
+                errors["base"] = "unknown"
+            else:
+                return self.async_create_entry(title="", data=user_input)
+
+        return self.async_show_form(step_id="init", data_schema=_options_schema(self.config_entry), errors=errors)
 
 
 class CannotConnect(HomeAssistantError):

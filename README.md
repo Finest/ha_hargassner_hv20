@@ -191,6 +191,8 @@ After restart:
 
 The integration validates the connection by reading one live `pm` frame.
 
+After setup, the integration exposes a Home Assistant options flow. Use the integration's **Configure** button to change host/IP, port, or scan interval later; the integration reloads itself after saving the new settings.
+
 It also creates a connectivity binary sensor named **Verbindung** (`binary_sensor.hargassner_hv20_verbindung`). This sensor stays available and turns off when the latest boiler poll failed, which makes it useful for dashboard status cards or alert automations.
 
 The boiler door contact is exposed as **Kesseltür**. The raw DAQ bit `TKS` is true when the door contact is closed; the Home Assistant door entity follows HA convention and is `on` when the door is open.

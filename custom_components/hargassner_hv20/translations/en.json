@@ -18,5 +18,22 @@
     "abort": {
       "already_configured": "This device is already configured."
     }
+  },
+  "options": {
+    "step": {
+      "init": {
+        "title": "Configure Hargassner HV20",
+        "description": "Change connection settings and scan interval. The integration is reloaded automatically afterwards.",
+        "data": {
+          "host": "Host/IP address",
+          "port": "Port",
+          "scan_interval": "Scan interval in seconds"
+        }
+      }
+    },
+    "error": {
+      "cannot_connect": "Could not connect or no valid pm data stream received.",
+      "unknown": "Unexpected error"
+    }
   }
 }

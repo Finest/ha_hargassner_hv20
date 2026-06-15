@@ -18,5 +18,22 @@
     "abort": {
       "already_configured": "Dieses Gerät ist bereits konfiguriert."
     }
+  },
+  "options": {
+    "step": {
+      "init": {
+        "title": "Hargassner HV20 konfigurieren",
+        "description": "Ändert Verbindung und Abfrageintervall. Die Integration wird danach automatisch neu geladen.",
+        "data": {
+          "host": "Host/IP-Adresse",
+          "port": "Port",
+          "scan_interval": "Abfrageintervall in Sekunden"
+        }
+      }
+    },
+    "error": {
+      "cannot_connect": "Keine Verbindung oder kein gültiger pm-Datenstrom empfangen.",
+      "unknown": "Unerwarteter Fehler"
+    }
   }
 }
