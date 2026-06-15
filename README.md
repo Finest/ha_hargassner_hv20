@@ -39,8 +39,11 @@ The integration maps those values into Home Assistant entities:
   - Außentemperatur
   - Rücklauftemperatur Ist
   - Puffer Ladezustand
+  - Kesselzustand (human-readable text from `ZK`)
+  - Kesselzustand Code (raw `ZK` number)
   - Kesselleistung
   - Störungsnummer
+  - Störungstext diagnostic sensor
 - `binary_sensor` entities for digital bitfields, for example:
   - Heizkreis-Pumpen
   - Mischer öffnet/schließt
@@ -49,7 +52,6 @@ The integration maps those values into Home Assistant entities:
   - Fremdwärme Freigabe/Pumpe
   - Verbindung / connectivity status
   - Kesseltür open/closed status
-  - Störungstext diagnostic sensor
 
 The channel mapping was generated from the boiler SD-card file:
 
@@ -193,7 +195,24 @@ It also creates a connectivity binary sensor named **Verbindung** (`binary_senso
 
 The boiler door contact is exposed as **Kesseltür**. The raw DAQ bit `TKS` is true when the door contact is closed; the Home Assistant door entity follows HA convention and is `on` when the door is open.
 
-A **Störungstext** sensor exposes `Keine Störung` for fault code `0` and falls back to `Störung <number>` for unknown non-zero fault numbers. A complete reliable fault-number-to-text mapping has not yet been verified for this firmware.
+A **Kesselzustand** text sensor maps the raw `ZK` code from DAQ analog channel `22` into readable HV-style states:
+
+- `1` = `Aus`
+- `2` = `Startvorbereitung`
+- `3` = `Kessel Start`
+- `4` = `Anheizen`
+- `5` = `Zündung`
+- `6`/`7` = `Leistungsbrand`
+- `8` = `Gluterhaltung`
+- `9` = `Ausbrand`
+- `10` = `Entaschung`
+- `11` = `Restwärme`
+- `12` = `Putzen`
+- `13` = `Tür offen`
+
+The raw **Kesselzustand Code** sensor is kept for diagnostics. The text mapping is marked as best-effort in entity attributes until the values have been verified against this exact HV20 display during real firing/burnout.
+
+A **Störungstext** sensor exposes `Keine Störung` for fault code `0`, includes a conservative partial mapping for common Hargassner fault numbers, and falls back to `Störung <number>` for unknown non-zero fault numbers. A complete reliable fault-number-to-text mapping has not yet been verified for this firmware.
 
 ## Entity behavior
 
